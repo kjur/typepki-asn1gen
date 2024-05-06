@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "types": ["bun-types"],
+
+    "lib": ["esnext"],
+    "module": "esnext",
+    "target": "esnext",
+    "moduleResolution": "bundler",
+
+    "noEmit": true,
+
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
+
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+  },
+  "exclude": ["_work"]
+}
