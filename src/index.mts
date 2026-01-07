@@ -22,13 +22,75 @@ export interface ASN1Data {
  * ]}) -> "3006020101020102"
  */
 export function getASN1(p: ASN1Data): string {
-  switch (p.t) {
-    case "int":
-      return generateASN1_int(p.v);
-    case "seq":
-      return generateASN1_seq(p.v);
+  if (p.t == "asn" && "tlv" in p.v) return p.v.tlv;
+
+  if (p.t == "seq" || p.t == "set" || p.t.match(/^a\d$/)) {
+    let hV = "";
+    for (let i = 0; i < p.v.length; i++) {
+      hV += getASN1(p.v[i]);
+    }
+    const hL = getLength(hV.length / 2);
+    const hT = tagtohex(p.t);
+    return `${hT}${hL}${hV}`;
   }
+
+  const hT: string = tagtohex(p.t);
+  const hV: string = _getValueHex(p.v);
+  const hL: string = getLength(hV.length / 2);
+  return `${hT}${hL}${hV}`;
+
   return "";
+}
+
+function _getValueHex(value: string | object): string {
+  if (typeof value === "string") {
+    if (value.match(/^[0-9a-f]+$/)) return value;
+    throw new Error("string but not hex");
+  } else if (typeof value === "object") {
+    if ("hex" in value && typeof value.hex == "string") return value.hex;
+    throw new Error(`unsupported value object: ${JSON.stringify(value)}`);
+  }
+  throw new Error("unsupported value");
+}
+
+/**
+ * get a hexadecimal string of ASN.1 tag by a tag name
+ * @param tagName - name of ASN.1 tag
+ * @return hexadecimal string of ASN.1 tag
+ * @example
+ * tagtohex("bool") -> "01"
+ * tagtohex("utf8str") -> "0c"
+ * tagtohex("a4") -> context specific constructed tag 4
+ * tagtohex("80") -> context specific tag 0
+ */
+export function tagtohex(tagName: string): string {
+  switch (tagName) {
+    case "bool":	return "01";
+    case "int":		return "02";
+    case "bitstr":	return "03";
+    case "octstr":	return "04";
+    case "null":	return "05";
+    case "oid":		return "06";
+    case "enum":	return "0a";
+    case "utf8str":	return "0c";
+    case "numstr":	return "12";
+    case "prnstr":	return "13";
+    case "telstr":	return "14";
+    case "vidstr":	return "15";
+    case "ia5str":	return "16";
+    case "utctime":	return "17";
+    case "gentime":	return "18";
+    case "grastr":	return "19";
+    case "visstr":	return "1a";
+    case "genstr":	return "1b";
+    case "unistr":	return "1c";
+    case "chrstr":	return "1d";
+    case "bmpstr":	return "1e";
+    case "seq":		return "30";
+    case "set":		return "31";
+  }
+  if (tagName.match(/^[8a]\d$/)) return tagName;
+  throw new Error(`unsupported tagName: ${tagName}`);
 }
 
 function generateASN1_int(v: string | object): string {
@@ -86,6 +148,7 @@ export function getLength(n: number): string {
  * zero padding for hexadecimal string
  * @param s - odd or even length hexadecimal string
  * @return even length zero padded hexadecimal string
+ * @deprecated use hexpad in typepki-strconv
  * @example
  * hexpad("1") -> "01"
  * hexpad("ab3c") -> "ab3c"
