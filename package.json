@@ -1,6 +1,6 @@
 {
   "name": "typepki-asn1gen",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "author": "Kenji Urushima <kenji.urushima@gmail.com>",
   "description": "ASN.1 data generator for TypePKI library (beta)",
   "homepage": "https://kjur.github.io/typepki-asn1gen",
@@ -63,7 +63,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "typepki-asn1gen": "file:typepki-asn1gen-0.2.0.tgz",
-    "typepki-strconv": "^0.5.0"
+    "typepki-asn1parse": "^0.8.0",
+    "typepki-strconv": "^0.11.0"
   }
 }

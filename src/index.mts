@@ -1,14 +1,6 @@
+export const VERSION: string = "typepki-asn1gen 0.5.0 kjur.github.io/typepki-asn1ge";
 import { ishex } from "typepki-strconv";
-
-/**
- * ASN.1 data object definition
- * @example
- * let d: ASN1Data = { t: "int", v: "1234" };
- */
-export interface ASN1Data {
-  t: string;
-  v: any;
-}
+import { ASN1Object, ASN1Value } from "typepki-asn1parse";
 
 /**
  * generate ASN.1 DER/BER encoded hexadecimal string from JSON data
@@ -21,13 +13,14 @@ export interface ASN1Data {
  *   { t: "int", v: "02" }
  * ]}) -> "3006020101020102"
  */
-export function getASN1(p: ASN1Data): string {
-  if (p.t == "asn" && "tlv" in p.v) return p.v.tlv;
+export function getASN1(p: ASN1Object): string {
+  if (p.t == "asn" && p.tlv !== undefined) return p.tlv;
 
   if (p.t == "seq" || p.t == "set" || p.t.match(/^a\d$/)) {
     let hV = "";
-    for (let i = 0; i < p.v.length; i++) {
-      hV += getASN1(p.v[i]);
+    let aASN: ASN1Object[] = p.v as ASN1Object[];
+    for (let i = 0; i < aASN.length; i++) {
+      hV += getASN1(aASN[i]);
     }
     const hL = getLength(hV.length / 2);
     const hT = tagtohex(p.t);
@@ -42,7 +35,7 @@ export function getASN1(p: ASN1Data): string {
   return "";
 }
 
-function _getValueHex(value: string | object): string {
+function _getValueHex(value: ASN1Value): string {
   if (typeof value === "string") {
     if (value.match(/^[0-9a-f]+$/)) return value;
     throw new Error("string but not hex");
@@ -91,21 +84,6 @@ export function tagtohex(tagName: string): string {
   }
   if (tagName.match(/^[8a]\d$/)) return tagName;
   throw new Error(`unsupported tagName: ${tagName}`);
-}
-
-function generateASN1_int(v: string | object): string {
-  if (typeof v == "string" && ishex(v)) {
-    return `02${getLength(v.length / 2)}${v}`;
-  }
-  return "";
-}
-
-function generateASN1_seq(v: Array<ASN1Data>): string {
-  let hV = "";
-  for (let i = 0; i < v.length; i++) {
-    hV += getASN1(v[i]);
-  }
-  return `30${getLength(hV.length / 2)}${hV}`;
 }
 
 /**

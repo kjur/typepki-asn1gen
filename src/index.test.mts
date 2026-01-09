@@ -42,15 +42,19 @@ test("getASN1", () => {
   expect(getASN1({t:"octstr",v:{hex:"abcd"}})).toBe("0402abcd");
 });
 
+test("getASN1 - asn(1)", () => {
+  
+});
+
 test("getASN1 - asn", () => {
-  expect(getASN1({t: "asn", v: { tlv: "020101" }})).toBe("020101");
+  expect(getASN1({t: "asn", v: "", tlv: "020101" })).toBe("020101");
 });
 
 test("getASN1 - IssuerSerial cert /C=JP/O=T1", () => {
   const pASN1 = {
     t: "seq", v: [
       { t: "seq", v: [
-	{ t: "a4", v: [ { t: "asn", v: { tlv: "301a310b3009060355040613024a50310b3009060355040a0c025431" } } ] }
+	{ t: "a4", v: [ { t: "asn", v: "", tlv: "301a310b3009060355040613024a50310b3009060355040a0c025431" } ] }
       ] },
       { t: "int", v: { hex: "01" } }
     ]
